@@ -58,12 +58,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 grid-pattern">
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 grid-pattern safe-area-top safe-area-bottom">
       {/* Background glow effect */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-20" 
+        <div className="absolute top-1/4 left-1/4 w-48 sm:w-96 h-48 sm:h-96 rounded-full opacity-20" 
              style={{ background: 'var(--gradient-glow)' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full opacity-10" 
+        <div className="absolute bottom-1/4 right-1/4 w-48 sm:w-96 h-48 sm:h-96 rounded-full opacity-10" 
              style={{ background: 'var(--gradient-glow)' }} />
       </div>
 
@@ -73,75 +73,75 @@ export default function Login() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="glass-card p-8 space-y-8">
+        <div className="glass-card p-5 sm:p-8 space-y-6 sm:space-y-8">
           {/* Logo/Header */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-3 sm:space-y-4">
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center glow-primary"
+              className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center glow-primary"
             >
-              <Shield className="w-10 h-10 text-primary-foreground" />
+              <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Guard Patrol</h1>
-              <p className="text-muted-foreground text-sm mt-1">Security Checkpoint System</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Guard Patrol</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm mt-1">Security Checkpoint System</p>
             </div>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
             {error && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm"
+                className="flex items-start gap-2 p-2.5 sm:p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-xs sm:text-sm"
               >
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {error}
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
               </motion.div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="email" className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Email
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="guard@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-12 bg-input border-border focus:border-primary focus:ring-primary"
+                  className="pl-9 sm:pl-10 h-11 sm:h-12 bg-input border-border focus:border-primary focus:ring-primary text-base"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-muted-foreground">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="password" className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-12 bg-input border-border focus:border-primary focus:ring-primary"
+                  className="pl-9 sm:pl-10 pr-9 sm:pr-10 h-11 sm:h-12 bg-input border-border focus:border-primary focus:ring-primary text-base"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 touch-feedback"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                 </button>
               </div>
             </div>
@@ -149,11 +149,11 @@ export default function Login() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity"
+              className="w-full h-11 sm:h-12 text-sm sm:text-base font-semibold bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity touch-feedback"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
                   Authenticating...
                 </>
               ) : (
@@ -163,7 +163,7 @@ export default function Login() {
           </form>
 
           {/* Footer */}
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
             Secure access for authorized personnel only
           </p>
         </div>

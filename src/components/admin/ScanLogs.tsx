@@ -124,15 +124,15 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Scan Logs</h2>
-          <p className="text-muted-foreground">View all checkpoint scan records</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Scan Logs</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">View all checkpoint scan records</p>
         </div>
         {showFilters && (
-          <Button onClick={exportCSV} variant="outline" disabled={scans.length === 0}>
+          <Button onClick={exportCSV} variant="outline" disabled={scans.length === 0} className="w-full sm:w-auto touch-feedback">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
@@ -141,15 +141,15 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
 
       {/* Filters */}
       {showFilters && (
-        <div className="glass-card p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="glass-card p-3 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="pl-9"
+                className="pl-9 h-10 sm:h-10"
               />
             </div>
             <div className="relative">
@@ -158,15 +158,15 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
                 type="date"
                 value={filters.date}
                 onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                className="pl-9"
+                className="pl-9 h-10 sm:h-10"
               />
             </div>
             <Select
               value={filters.guardId}
               onValueChange={(value) => setFilters({ ...filters, guardId: value })}
             >
-              <SelectTrigger>
-                <User className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectTrigger className="h-10 sm:h-10">
+                <User className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
                 <SelectValue placeholder="All Guards" />
               </SelectTrigger>
               <SelectContent>
@@ -182,8 +182,8 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
               value={filters.checkpointId}
               onValueChange={(value) => setFilters({ ...filters, checkpointId: value })}
             >
-              <SelectTrigger>
-                <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectTrigger className="h-10 sm:h-10">
+                <MapPin className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
                 <SelectValue placeholder="All Checkpoints" />
               </SelectTrigger>
               <SelectContent>
