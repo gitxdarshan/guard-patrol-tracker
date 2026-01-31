@@ -27,27 +27,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     try {
       // Fetch profile
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
 
-      if (profileData) {
+      if (profileError) {
+        // If profile is missing or blocked, don't keep stale state
+        setProfile(null);
+      } else if (profileData) {
         setProfile(profileData as Profile);
       }
 
       // Fetch roles
-      const { data: rolesData } = await supabase
+      const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
 
-      if (rolesData) {
+      if (rolesError) {
+        setRoles([]);
+      } else if (rolesData) {
         setRoles(rolesData.map(r => r.role as AppRole));
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setProfile(null);
+      setRoles([]);
     }
   };
 
@@ -60,20 +67,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    const withTimeout = async <T,>(promise: Promise<T>, ms: number): Promise<T> => {
+      let timeoutId: number | undefined;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = window.setTimeout(() => reject(new Error('Auth initialization timed out')), ms);
+      });
+
+      try {
+        return await Promise.race([promise, timeoutPromise]);
+      } finally {
+        if (timeoutId) window.clearTimeout(timeoutId);
+      }
+    };
+
+    const clearUserState = () => {
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setRoles([]);
+    };
+
+    // Listener for ongoing auth changes (does NOT control isLoading)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, nextSession) => {
+        if (!mounted) return;
+
+        if (event === 'SIGNED_OUT') {
+          clearUserState();
+          return;
+        }
+
+        // SIGNED_IN / TOKEN_REFRESHED / USER_UPDATED etc.
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
+
+        if (nextSession?.user) {
+          // fire-and-forget; initial loading is handled separately
+          void fetchUserData(nextSession.user.id);
+        } else {
+          setProfile(null);
+          setRoles([]);
+        }
+      }
+    );
+
     // Get initial session first
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await withTimeout(supabase.auth.getSession(), 10000);
         
         if (!mounted) return;
         
-        if (session?.user) {
-          setSession(session);
-          setUser(session.user);
-          await fetchUserData(session.user.id);
-        }
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) await fetchUserData(session.user.id);
       } catch (error) {
         console.error('Error initializing auth:', error);
+        // Ensure UI doesn't stay stuck if initialization fails
+        clearUserState();
       } finally {
         if (mounted) {
           setIsLoading(false);
@@ -82,27 +134,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initializeAuth();
-
-    // Then set up auth state listener for future changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-
-        // Handle auth state changes (login, logout, token refresh)
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          setSession(session);
-          setUser(session?.user ?? null);
-          if (session?.user) {
-            await fetchUserData(session.user.id);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setRoles([]);
-        }
-      }
-    );
 
     return () => {
       mounted = false;
