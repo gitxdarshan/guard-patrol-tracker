@@ -7,82 +7,52 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { roles } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      if (isSignUp) {
-        // Sign up flow
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { full_name: fullName },
-          },
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+
+      if (data.user) {
+        const { data: rolesData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id);
+
+        const userRoles = rolesData?.map(r => r.role) || [];
+
+        toast({
+          title: 'Welcome back!',
+          description: 'Login successful',
         });
 
-        if (signUpError) throw signUpError;
-
-        if (data.user) {
-          toast({
-            title: 'Account created!',
-            description: 'Please check your email to verify your account.',
-          });
-          setIsSignUp(false);
-          setEmail('');
-          setPassword('');
-          setFullName('');
-        }
-      } else {
-        // Sign in flow
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) throw signInError;
-
-        if (data.user) {
-          const { data: rolesData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', data.user.id);
-
-          const userRoles = rolesData?.map(r => r.role) || [];
-
-          toast({
-            title: 'Welcome back!',
-            description: 'Login successful',
-          });
-
-          if (userRoles.includes('admin')) {
-            navigate('/admin');
-          } else if (userRoles.includes('guard')) {
-            navigate('/guard');
-          } else {
-            setError('No role assigned. Contact administrator.');
-          }
+        if (userRoles.includes('admin')) {
+          navigate('/admin');
+        } else if (userRoles.includes('guard')) {
+          navigate('/guard');
+        } else {
+          setError('No role assigned. Contact administrator.');
         }
       }
     } catch (err: any) {
-      setError(err.message || (isSignUp ? 'Sign up failed' : 'Login failed'));
+      setError(err.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
@@ -121,8 +91,8 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
             {error && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -132,26 +102,6 @@ export default function Login() {
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
               </motion.div>
-            )}
-
-            {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-sm font-medium text-muted-foreground">
-                  Full Name
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="pl-10 h-12 bg-input border-border focus:border-primary focus:ring-primary"
-                    required
-                  />
-                </div>
-              </div>
             )}
 
             <div className="space-y-2">
@@ -186,7 +136,6 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10 h-12 bg-input border-border focus:border-primary focus:ring-primary"
                   required
-                  minLength={6}
                 />
                 <button
                   type="button"
@@ -206,27 +155,13 @@ export default function Login() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  {isSignUp ? 'Creating account...' : 'Authenticating...'}
+                  Authenticating...
                 </>
               ) : (
-                isSignUp ? 'Create Account' : 'Sign In'
+                'Sign In'
               )}
             </Button>
           </form>
-
-          {/* Toggle Sign Up / Sign In */}
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError('');
-              }}
-              className="text-sm text-primary hover:underline"
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </button>
-          </div>
 
           {/* Footer */}
           <p className="text-center text-xs text-muted-foreground">
