@@ -32,7 +32,12 @@ export default function GuardDashboard() {
     const maxFrames = 30; // ~0.5s at 60fps
     for (let i = 0; i < maxFrames; i++) {
       const el = document.getElementById('qr-reader');
-      if (el) return;
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        // iOS Safari can show a blank camera if we start while the container is still
+        // animating (scale/opacity) and reports ~0 size.
+        if (rect.width >= 200 && rect.height >= 200) return;
+      }
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
     }
     throw new Error('Scanner UI not ready. Please try again.');
