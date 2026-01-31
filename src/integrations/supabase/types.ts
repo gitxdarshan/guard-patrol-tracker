@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      guard_locations: {
+        Row: {
+          guard_id: string
+          guard_name: string
+          id: string
+          latitude: number
+          longitude: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          guard_id: string
+          guard_name: string
+          id?: string
+          latitude: number
+          longitude: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          guard_id?: string
+          guard_name?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

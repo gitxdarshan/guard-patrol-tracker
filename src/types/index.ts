@@ -43,3 +43,13 @@ export interface AuthUser {
   profile: Profile | null;
   roles: AppRole[];
 }
+
+export interface GuardLocation {
+  id: string;
+  guard_id: string;
+  guard_name: string;
+  latitude: number;
+  longitude: number;
+  status: 'on_patrol' | 'idle' | 'offline';
+  updated_at: string;
+}
