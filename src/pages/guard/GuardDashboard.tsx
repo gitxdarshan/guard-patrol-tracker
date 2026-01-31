@@ -49,58 +49,56 @@ export default function GuardDashboard() {
     fetchCheckpoints();
   }, [user, lastScan]);
 
-  // Check camera permission
-  const checkCameraPermission = async (): Promise<boolean> => {
-    try {
-      // First check if camera permission is already granted
-      if (navigator.permissions) {
-        const result = await navigator.permissions.query({ name: 'camera' as PermissionName });
-        if (result.state === 'denied') {
-          setErrorMessage('Camera permission denied. Please enable camera access in your browser settings.');
-          setScanStatus('error');
-          return false;
-        }
-      }
-
-      // Try to get camera access
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      // Stop the stream immediately - we just needed to trigger permission
-      stream.getTracks().forEach(track => track.stop());
-      return true;
-    } catch (err: any) {
-      console.error('Camera permission error:', err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setErrorMessage('Camera permission denied. Please allow camera access and try again.');
-      } else if (err.name === 'NotFoundError') {
-        setErrorMessage('No camera found on this device.');
-      } else {
-        setErrorMessage('Unable to access camera. Please check your browser settings.');
-      }
-      setScanStatus('error');
-      return false;
-    }
-  };
-
-  // Initialize scanner
+  // Initialize scanner - robust approach for iOS/Android
   const initializeScanner = useCallback(async () => {
     if (isScanning) return;
     
-    // Check camera permission first
-    const hasPermission = await checkCameraPermission();
-    if (!hasPermission) return;
+    setScanStatus('scanning');
+    setErrorMessage('');
     
     try {
+      // First, get available cameras - this triggers permission prompt on mobile
+      let cameras: { id: string; label: string }[] = [];
+      try {
+        cameras = await Html5Qrcode.getCameras();
+        console.log('Available cameras:', cameras);
+      } catch (camErr: any) {
+        console.error('getCameras error:', camErr);
+        // If getCameras fails, permission was denied
+        throw new Error('Camera permission denied. Please allow camera access in your browser/device settings and try again.');
+      }
+
+      if (!cameras || cameras.length === 0) {
+        throw new Error('No camera found on this device.');
+      }
+
+      // Find back camera (environment facing) - check label for common keywords
+      let selectedCameraId = cameras[0].id;
+      const backCamera = cameras.find(cam => 
+        cam.label.toLowerCase().includes('back') || 
+        cam.label.toLowerCase().includes('rear') ||
+        cam.label.toLowerCase().includes('environment')
+      );
+      if (backCamera) {
+        selectedCameraId = backCamera.id;
+      } else if (cameras.length > 1) {
+        // Usually back camera is last in the list on mobile devices
+        selectedCameraId = cameras[cameras.length - 1].id;
+      }
+      
+      console.log('Selected camera:', selectedCameraId);
+
       const html5Qrcode = new Html5Qrcode('qr-reader', {
         formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
         verbose: false,
       });
       
       setScanner(html5Qrcode);
-      setScanStatus('scanning');
       setIsScanning(true);
 
+      // Start with specific camera ID (more reliable on iOS)
       await html5Qrcode.start(
-        { facingMode: 'environment' },
+        selectedCameraId,
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
@@ -109,13 +107,23 @@ export default function GuardDashboard() {
         handleScanSuccess,
         () => {} // Ignore scan errors (expected when no QR in view)
       );
+      
+      console.log('Scanner started successfully');
     } catch (err: any) {
       console.error('Scanner init error:', err);
-      if (err.message?.includes('Permission')) {
-        setErrorMessage('Camera permission denied. Please allow camera access in your browser settings.');
+      const errorMsg = err.message || 'Failed to start camera';
+      
+      // Provide helpful error messages
+      if (errorMsg.includes('Permission') || errorMsg.includes('NotAllowed')) {
+        setErrorMessage('Camera permission denied. Please allow camera access in your browser settings, then reload the page.');
+      } else if (errorMsg.includes('NotFound') || errorMsg.includes('No camera')) {
+        setErrorMessage('No camera found on this device.');
+      } else if (errorMsg.includes('NotReadable') || errorMsg.includes('in use')) {
+        setErrorMessage('Camera is in use by another app. Please close other apps using the camera.');
       } else {
-        setErrorMessage(err.message || 'Failed to start camera');
+        setErrorMessage(errorMsg);
       }
+      
       setScanStatus('error');
       setIsScanning(false);
     }
