@@ -24,6 +24,7 @@ export default function GuardDashboard() {
   const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isStartingRef = useRef(false);
+  const isProcessingScanRef = useRef(false); // Guard against duplicate scan processing
   const [errorMessage, setErrorMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
 
@@ -195,6 +196,13 @@ export default function GuardDashboard() {
 
   // Handle successful scan
   const handleScanSuccess = async (decodedText: string) => {
+    // CRITICAL: Guard against duplicate processing - QR scanner may fire callback multiple times
+    if (isProcessingScanRef.current) {
+      console.log('Scan already being processed, ignoring duplicate callback');
+      return;
+    }
+    isProcessingScanRef.current = true;
+
     // Stop scanner immediately
     const active = scannerRef.current;
     if (active) {
@@ -294,6 +302,7 @@ export default function GuardDashboard() {
     setErrorMessage('');
     scannerRef.current = null;
     setScanner(null);
+    isProcessingScanRef.current = false; // Reset processing guard for next scan
   };
 
   return (
