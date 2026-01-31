@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Scan as ScanType, Checkpoint } from '@/types';
 import { format, subMinutes, isAfter } from 'date-fns';
 import { useLocationTracking } from '@/hooks/useLocationTracking';
+import { InstallButton } from '@/components/InstallButton';
 
 // Calculate distance between two GPS points in meters (Haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -369,9 +370,12 @@ export default function GuardDashboard() {
               <p className="font-semibold text-foreground">{profile?.full_name || 'Guard'}</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground">
-            <LogOut className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <InstallButton />
+            <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground">
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
