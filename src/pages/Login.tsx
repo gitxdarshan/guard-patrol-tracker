@@ -51,6 +51,8 @@ export default function Login() {
       // AuthContext will handle the redirect via useEffect above
     } catch (err: any) {
       setError(err.message || 'Login failed');
+    } finally {
+      // Always re-enable the form (redirect will still happen if roles load)
       setIsLoading(false);
     }
   };
