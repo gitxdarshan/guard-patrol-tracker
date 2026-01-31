@@ -354,40 +354,40 @@ export default function GuardDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col safe-area-top">
       {/* Header */}
-      <header className="glass-card rounded-none border-x-0 border-t-0 p-4">
+      <header className="glass-card rounded-none border-x-0 border-t-0 p-3 sm:p-4 safe-area-x">
         <div className="flex items-center justify-between max-w-lg mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center">
-              <Shield className="w-5 h-5 text-primary-foreground" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center flex-shrink-0">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <Radio className="w-3 h-3 text-success animate-pulse" />
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
+                <Radio className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-success animate-pulse" />
                 On Duty
               </p>
-              <p className="font-semibold text-foreground">{profile?.full_name || 'Guard'}</p>
+              <p className="font-semibold text-sm sm:text-base text-foreground truncate">{profile?.full_name || 'Guard'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <InstallButton />
-            <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground">
-              <LogOut className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground touch-feedback h-9 w-9 sm:h-10 sm:w-10">
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 max-w-lg mx-auto w-full space-y-6">
+      <main className="flex-1 p-3 sm:p-4 max-w-lg mx-auto w-full space-y-4 sm:space-y-6 safe-area-x safe-area-bottom scroll-smooth-mobile">
         {/* Scanner Section */}
         <motion.div 
           layout
-          className="glass-card p-6 space-y-4"
+          className="glass-card p-4 sm:p-6 space-y-4"
         >
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <Scan className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-2 text-base sm:text-lg font-semibold">
+            <Scan className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             <span>Scan Checkpoint</span>
           </div>
 
@@ -398,19 +398,19 @@ export default function GuardDashboard() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-4 py-8"
+                className="flex flex-col items-center gap-3 sm:gap-4 py-6 sm:py-8"
               >
-                <div className="w-24 h-24 rounded-2xl bg-secondary/50 flex items-center justify-center">
-                  <Camera className="w-12 h-12 text-muted-foreground" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-secondary/50 flex items-center justify-center">
+                  <Camera className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground text-center">
+                <p className="text-muted-foreground text-center text-sm sm:text-base px-2">
                   Tap below to scan a checkpoint QR code
                 </p>
                 <Button
                   onClick={initializeScanner}
-                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary-glow"
+                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-primary to-primary-glow touch-feedback"
                 >
-                  <Camera className="w-5 h-5 mr-2" />
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Start Scanning
                 </Button>
               </motion.div>
@@ -562,33 +562,33 @@ export default function GuardDashboard() {
         </motion.div>
 
         {/* Recent Scans */}
-        <div className="glass-card p-6 space-y-4">
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <History className="w-5 h-5 text-primary" />
+        <div className="glass-card p-4 sm:p-6 space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 text-base sm:text-lg font-semibold">
+            <History className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             <span>Recent Scans</span>
           </div>
 
           {recentScans.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm sm:text-base">
               No scans recorded yet
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {recentScans.map((scan, index) => (
                 <motion.div
                   key={scan.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/30"
+                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 touch-feedback"
                 >
-                  <div>
-                    <p className="font-medium">{scan.checkpoint_name}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <p className="font-medium text-sm sm:text-base truncate">{scan.checkpoint_name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       {format(new Date(scan.scanned_at), 'MMM d, h:mm a')}
                     </p>
                   </div>
-                  <CheckCircle2 className="w-5 h-5 text-success" />
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-success flex-shrink-0" />
                 </motion.div>
               ))}
             </div>
