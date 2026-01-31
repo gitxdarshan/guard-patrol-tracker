@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Lock, User, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,18 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, roles, isLoading: authLoading } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user && roles.length > 0) {
+      if (roles.includes('admin')) {
+        navigate('/admin', { replace: true });
+      } else if (roles.includes('guard')) {
+        navigate('/guard', { replace: true });
+      }
+    }
+  }, [user, roles, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,37 +36,21 @@ export default function Login() {
     setError('');
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) throw signInError;
 
-      if (data.user) {
-        const { data: rolesData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id);
+      toast({
+        title: 'Welcome back!',
+        description: 'Login successful',
+      });
 
-        const userRoles = rolesData?.map(r => r.role) || [];
-
-        toast({
-          title: 'Welcome back!',
-          description: 'Login successful',
-        });
-
-        if (userRoles.includes('admin')) {
-          navigate('/admin');
-        } else if (userRoles.includes('guard')) {
-          navigate('/guard');
-        } else {
-          setError('No role assigned. Contact administrator.');
-        }
-      }
+      // AuthContext will handle the redirect via useEffect above
     } catch (err: any) {
       setError(err.message || 'Login failed');
-    } finally {
       setIsLoading(false);
     }
   };
