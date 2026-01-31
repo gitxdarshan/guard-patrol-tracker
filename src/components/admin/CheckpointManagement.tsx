@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, MapPin, Loader2, QrCode, Download, Printer } from 'lucide-react';
+import { Plus, Trash2, MapPin, Loader2, QrCode, Download, Printer, Navigation, CheckCircle2 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,9 +41,39 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<Checkpoint | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState('');
-  const [newCheckpoint, setNewCheckpoint] = useState({ name: '', location: '' });
+  const [newCheckpoint, setNewCheckpoint] = useState({ name: '', location: '', latitude: '', longitude: '' });
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
   const qrRef = useRef<HTMLImageElement>(null);
+
+  // Get current GPS location
+  const getCurrentLocation = async () => {
+    setIsGettingLocation(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+        });
+      });
+      setNewCheckpoint(prev => ({
+        ...prev,
+        latitude: position.coords.latitude.toFixed(6),
+        longitude: position.coords.longitude.toFixed(6),
+      }));
+      toast({
+        title: 'Location Captured',
+        description: 'GPS coordinates have been set',
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Location Error',
+        description: 'Could not get GPS location. Please enter manually.',
+        variant: 'destructive',
+      });
+    }
+    setIsGettingLocation(false);
+  };
 
   useEffect(() => {
     fetchCheckpoints();
@@ -65,9 +95,14 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
   const createCheckpoint = async () => {
     setIsCreating(true);
     try {
+      const lat = newCheckpoint.latitude ? parseFloat(newCheckpoint.latitude) : null;
+      const lng = newCheckpoint.longitude ? parseFloat(newCheckpoint.longitude) : null;
+
       const { error } = await supabase.from('checkpoints').insert({
         name: newCheckpoint.name,
         location: newCheckpoint.location,
+        latitude: lat,
+        longitude: lng,
         created_by: user?.id,
       });
 
@@ -75,10 +110,10 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
 
       toast({
         title: 'Checkpoint Created',
-        description: `${newCheckpoint.name} has been added`,
+        description: `${newCheckpoint.name} has been added${lat && lng ? ' with GPS verification' : ''}`,
       });
 
-      setNewCheckpoint({ name: '', location: '' });
+      setNewCheckpoint({ name: '', location: '', latitude: '', longitude: '' });
       setDialogOpen(false);
       fetchCheckpoints();
       onUpdate();
@@ -213,6 +248,61 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
                   onChange={(e) => setNewCheckpoint({ ...newCheckpoint, location: e.target.value })}
                 />
               </div>
+              
+              {/* GPS Coordinates Section */}
+              <div className="space-y-3 p-3 rounded-lg bg-secondary/30">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <Navigation className="w-4 h-4 text-primary" />
+                    GPS Location (for verification)
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={getCurrentLocation}
+                    disabled={isGettingLocation}
+                  >
+                    {isGettingLocation ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <MapPin className="w-4 h-4 mr-1" />
+                        Get Current
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Latitude</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="19.0760"
+                      value={newCheckpoint.latitude}
+                      onChange={(e) => setNewCheckpoint({ ...newCheckpoint, latitude: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Longitude</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="72.8777"
+                      value={newCheckpoint.longitude}
+                      onChange={(e) => setNewCheckpoint({ ...newCheckpoint, longitude: e.target.value })}
+                    />
+                  </div>
+                </div>
+                {newCheckpoint.latitude && newCheckpoint.longitude && (
+                  <p className="text-xs text-success flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    GPS verification enabled for this checkpoint
+                  </p>
+                )}
+              </div>
+
               <Button
                 onClick={createCheckpoint}
                 disabled={isCreating || !newCheckpoint.name || !newCheckpoint.location}
@@ -296,6 +386,14 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
                       <div>
                         <p className="font-medium">{checkpoint.name}</p>
                         <p className="text-sm text-muted-foreground">{checkpoint.location}</p>
+                        {checkpoint.latitude && checkpoint.longitude ? (
+                          <p className="text-xs text-success flex items-center gap-1 mt-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            GPS Verified
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/60 mt-1">No GPS set</p>
+                        )}
                       </div>
                     </div>
                   </div>

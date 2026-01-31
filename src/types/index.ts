@@ -19,6 +19,8 @@ export interface Checkpoint {
   id: string;
   name: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
   created_by: string | null;
 }

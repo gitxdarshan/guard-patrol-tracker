@@ -19,21 +19,27 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          latitude: number | null
           location: string
+          longitude: number | null
           name: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           id?: string
+          latitude?: number | null
           location: string
+          longitude?: number | null
           name: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
           id?: string
+          latitude?: number | null
           location?: string
+          longitude?: number | null
           name?: string
         }
         Relationships: []
