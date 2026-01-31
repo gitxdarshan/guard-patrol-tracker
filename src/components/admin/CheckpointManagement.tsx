@@ -41,7 +41,7 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<Checkpoint | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState('');
-  const [newCheckpoint, setNewCheckpoint] = useState({ name: '', location: '', latitude: '', longitude: '' });
+  const [newCheckpoint, setNewCheckpoint] = useState({ name: '', location: '', latitude: '', longitude: '', distance: '100' });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
   const qrRef = useRef<HTMLImageElement>(null);
@@ -97,12 +97,14 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
     try {
       const lat = newCheckpoint.latitude ? parseFloat(newCheckpoint.latitude) : null;
       const lng = newCheckpoint.longitude ? parseFloat(newCheckpoint.longitude) : null;
+      const dist = newCheckpoint.distance ? parseFloat(newCheckpoint.distance) : 100;
 
       const { error } = await supabase.from('checkpoints').insert({
         name: newCheckpoint.name,
         location: newCheckpoint.location,
         latitude: lat,
         longitude: lng,
+        distance: dist,
         created_by: user?.id,
       });
 
@@ -113,7 +115,7 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
         description: `${newCheckpoint.name} has been added${lat && lng ? ' with GPS verification' : ''}`,
       });
 
-      setNewCheckpoint({ name: '', location: '', latitude: '', longitude: '' });
+      setNewCheckpoint({ name: '', location: '', latitude: '', longitude: '', distance: '100' });
       setDialogOpen(false);
       fetchCheckpoints();
       onUpdate();
@@ -303,6 +305,24 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
                 )}
               </div>
 
+              {/* Distance Field */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Navigation className="w-4 h-4 text-primary" />
+                  Allowed Distance (meters)
+                </Label>
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="100"
+                  value={newCheckpoint.distance}
+                  onChange={(e) => setNewCheckpoint({ ...newCheckpoint, distance: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Guard ko is distance ke andar hona chahiye scan karne ke liye
+                </p>
+              </div>
+
               <Button
                 onClick={createCheckpoint}
                 disabled={isCreating || !newCheckpoint.name || !newCheckpoint.location}
@@ -389,7 +409,7 @@ export function CheckpointManagement({ onUpdate }: CheckpointManagementProps) {
                         {checkpoint.latitude && checkpoint.longitude ? (
                           <p className="text-xs text-success flex items-center gap-1 mt-1">
                             <CheckCircle2 className="w-3 h-3" />
-                            GPS Verified
+                            GPS Verified • {checkpoint.distance || 100}m range
                           </p>
                         ) : (
                           <p className="text-xs text-muted-foreground/60 mt-1">No GPS set</p>
