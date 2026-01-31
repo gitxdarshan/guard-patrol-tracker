@@ -12,7 +12,23 @@ import { useToast } from '@/hooks/use-toast';
 import { Scan as ScanType, Checkpoint } from '@/types';
 import { format, subMinutes, isAfter } from 'date-fns';
 
-type ScanStatus = 'idle' | 'scanning' | 'success' | 'error' | 'duplicate';
+// Calculate distance between two GPS points in meters (Haversine formula)
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371e3; // Earth's radius in meters
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+};
+
+type ScanStatus = 'idle' | 'scanning' | 'success' | 'error' | 'duplicate' | 'location_warning';
 
 export default function GuardDashboard() {
   const { user, profile, signOut } = useAuth();
@@ -249,26 +265,42 @@ export default function GuardDashboard() {
         return;
       }
 
-      // Get current location (optional)
+      // Get current location (required for GPS verification)
       let lat: number | null = null;
       let lng: number | null = null;
+      let distanceFromCheckpoint: number | null = null;
       
       try {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          navigator.geolocation.getCurrentPosition(resolve, reject, { 
+            enableHighAccuracy: true,
+            timeout: 10000 
+          });
         });
         lat = position.coords.latitude;
         lng = position.coords.longitude;
+
+        // Calculate distance if checkpoint has GPS coordinates
+        const cp = checkpoint as Checkpoint;
+        if (cp.latitude && cp.longitude && lat && lng) {
+          distanceFromCheckpoint = calculateDistance(lat, lng, cp.latitude, cp.longitude);
+        }
       } catch (e) {
         console.log('Location not available');
       }
 
-      // Record scan
+      // GPS Verification: Check if guard is within 100 meters
+      const MAX_DISTANCE_METERS = 100;
+      const cp = checkpoint as Checkpoint;
+      const hasCheckpointGPS = cp.latitude && cp.longitude;
+      const isTooFar = hasCheckpointGPS && distanceFromCheckpoint !== null && distanceFromCheckpoint > MAX_DISTANCE_METERS;
+
+      // Record scan (even if too far - we log it anyway)
       const scanData = {
         guard_id: user?.id,
         guard_name: profile?.full_name || user?.email || 'Unknown',
         checkpoint_id: checkpointId,
-        checkpoint_name: (checkpoint as Checkpoint).name,
+        checkpoint_name: cp.name,
         latitude: lat,
         longitude: lng,
       };
@@ -282,12 +314,23 @@ export default function GuardDashboard() {
       if (insertError) throw insertError;
 
       setLastScan(newScan as ScanType);
-      setScanStatus('success');
-      
-      toast({
-        title: 'Checkpoint Verified!',
-        description: `${(checkpoint as Checkpoint).name} scanned successfully`,
-      });
+
+      // Show warning if too far from checkpoint
+      if (isTooFar && distanceFromCheckpoint) {
+        setScanStatus('location_warning');
+        setErrorMessage(`You are ${Math.round(distanceFromCheckpoint)}m away from checkpoint (max ${MAX_DISTANCE_METERS}m)`);
+        toast({
+          title: '⚠️ Location Warning',
+          description: `Scan recorded but you're ${Math.round(distanceFromCheckpoint)}m away from checkpoint`,
+          variant: 'destructive',
+        });
+      } else {
+        setScanStatus('success');
+        toast({
+          title: 'Checkpoint Verified!',
+          description: `${cp.name} scanned successfully${distanceFromCheckpoint !== null ? ` (${Math.round(distanceFromCheckpoint)}m away)` : ''}`,
+        });
+      }
 
     } catch (err: any) {
       console.error('Scan error:', err);
@@ -421,6 +464,45 @@ export default function GuardDashboard() {
                       <span>Location recorded</span>
                     </div>
                   )}
+                </div>
+                <Button onClick={resetScanner} className="w-full">
+                  Scan Another
+                </Button>
+              </motion.div>
+            )}
+
+            {scanStatus === 'location_warning' && lastScan && (
+              <motion.div
+                key="location_warning"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="flex flex-col items-center gap-4 py-6"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 300, delay: 0.1 }}
+                  className="w-20 h-20 rounded-full bg-warning/20 flex items-center justify-center"
+                >
+                  <AlertTriangle className="w-10 h-10 text-warning" />
+                </motion.div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-warning">Location Warning</h3>
+                  <p className="text-muted-foreground mt-1">{errorMessage}</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Scan was recorded but flagged for review
+                  </p>
+                </div>
+                <div className="w-full p-4 rounded-lg bg-secondary/30 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span>{lastScan.checkpoint_name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span>{format(new Date(lastScan.scanned_at), 'PPp')}</span>
+                  </div>
                 </div>
                 <Button onClick={resetScanner} className="w-full">
                   Scan Another
