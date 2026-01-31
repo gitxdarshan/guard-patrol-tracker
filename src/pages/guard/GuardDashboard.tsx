@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { 
   Shield, LogOut, Camera, CheckCircle2, XCircle, 
-  MapPin, Clock, AlertTriangle, History, Scan
+  MapPin, Clock, AlertTriangle, History, Scan, Radio
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Scan as ScanType, Checkpoint } from '@/types';
 import { format, subMinutes, isAfter } from 'date-fns';
+import { useLocationTracking } from '@/hooks/useLocationTracking';
 
 // Calculate distance between two GPS points in meters (Haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -43,6 +44,9 @@ export default function GuardDashboard() {
   const isProcessingScanRef = useRef(false); // Guard against duplicate scan processing
   const [errorMessage, setErrorMessage] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+
+  // Enable real-time location tracking
+  useLocationTracking(true);
 
   const waitForQrReaderEl = useCallback(async () => {
     // Ensure the "qr-reader" container exists before Html5Qrcode.start()
@@ -358,7 +362,10 @@ export default function GuardDashboard() {
               <Shield className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">On Duty</p>
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <Radio className="w-3 h-3 text-success animate-pulse" />
+                On Duty
+              </p>
               <p className="font-semibold text-foreground">{profile?.full_name || 'Guard'}</p>
             </div>
           </div>

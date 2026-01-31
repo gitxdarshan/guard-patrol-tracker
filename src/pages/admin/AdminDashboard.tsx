@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Shield, LogOut, Users, MapPin, ClipboardList, 
-  Plus, Download, Search, Filter, Calendar
+  Plus, Download, Search, Filter, Calendar, Radio
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,7 @@ import { GuardManagement } from '@/components/admin/GuardManagement';
 import { CheckpointManagement } from '@/components/admin/CheckpointManagement';
 import { ScanLogs } from '@/components/admin/ScanLogs';
 import { DashboardStats } from '@/components/admin/DashboardStats';
+import { LiveGuardMap } from '@/components/admin/LiveGuardMap';
 import { Scan, Checkpoint, Profile, UserRole } from '@/types';
 
 export default function AdminDashboard() {
@@ -90,10 +91,14 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="glass-card p-1 w-full sm:w-auto grid grid-cols-4 sm:flex gap-1">
+          <TabsList className="glass-card p-1 w-full sm:w-auto grid grid-cols-5 sm:flex gap-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ClipboardList className="w-4 h-4 mr-2 hidden sm:block" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="tracking" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Radio className="w-4 h-4 mr-2 hidden sm:block" />
+              Live
             </TabsTrigger>
             <TabsTrigger value="guards" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Users className="w-4 h-4 mr-2 hidden sm:block" />
@@ -112,6 +117,10 @@ export default function AdminDashboard() {
           <TabsContent value="overview" className="space-y-6">
             <DashboardStats stats={stats} />
             <ScanLogs limit={5} showFilters={false} />
+          </TabsContent>
+
+          <TabsContent value="tracking">
+            <LiveGuardMap />
           </TabsContent>
 
           <TabsContent value="guards">
