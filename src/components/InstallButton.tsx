@@ -17,7 +17,7 @@ export function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [showIOSDialog, setShowIOSDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     // Check if iOS
@@ -49,7 +49,7 @@ export function InstallButton() {
 
   const handleInstall = async () => {
     if (isIOS) {
-      setShowIOSDialog(true);
+      setShowDialog(true);
       return;
     }
 
@@ -60,14 +60,17 @@ export function InstallButton() {
         setIsInstalled(true);
       }
       setDeferredPrompt(null);
+    } else {
+      // Show instructions for desktop or unsupported browsers
+      setShowDialog(true);
     }
   };
 
   // Don't show if already installed
   if (isInstalled) return null;
 
-  // Show button on iOS or when prompt is available
-  if (!isIOS && !deferredPrompt) return null;
+  // Check if we can show native prompt or iOS instructions
+  const canInstall = isIOS || deferredPrompt;
 
   return (
     <>
@@ -79,35 +82,56 @@ export function InstallButton() {
         title="Install App"
       >
         <Download className="w-5 h-5" />
-        <span className="absolute -top-1 -right-1 w-2 h-2 bg-success rounded-full animate-pulse" />
+        {canInstall && (
+          <span className="absolute -top-1 -right-1 w-2 h-2 bg-success rounded-full animate-pulse" />
+        )}
       </Button>
 
-      {/* iOS Instructions Dialog */}
-      <Dialog open={showIOSDialog} onOpenChange={setShowIOSDialog}>
+      {/* Install Instructions Dialog */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="glass-card border-border max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Smartphone className="w-5 h-5 text-primary" />
-              Install on iPhone
+              Install Guard Patrol App
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">1</div>
-                <p className="text-sm">Tap the <strong>Share</strong> button in Safari</p>
+            {isIOS ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">iPhone pe install karne ke liye:</p>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">1</div>
+                  <p className="text-sm">Safari mein <strong>Share</strong> button tap karo</p>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">2</div>
+                  <p className="text-sm">Scroll karke <strong>"Add to Home Screen"</strong> tap karo</p>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">3</div>
+                  <p className="text-sm"><strong>"Add"</strong> tap karke install karo</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">2</div>
-                <p className="text-sm">Scroll down and tap <strong>"Add to Home Screen"</strong></p>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">Mobile pe install karne ke liye:</p>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">1</div>
+                  <p className="text-sm">Apne <strong>phone ke browser</strong> mein yeh page kholo</p>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">2</div>
+                  <p className="text-sm">Chrome: Menu → <strong>"Install App"</strong></p>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">3</div>
+                  <p className="text-sm">Safari: Share → <strong>"Add to Home Screen"</strong></p>
+                </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold">3</div>
-                <p className="text-sm">Tap <strong>"Add"</strong> to install</p>
-              </div>
-            </div>
-            <Button onClick={() => setShowIOSDialog(false)} className="w-full">
-              Got it!
+            )}
+            <Button onClick={() => setShowDialog(false)} className="w-full">
+              Samajh Gaya!
             </Button>
           </div>
         </DialogContent>
