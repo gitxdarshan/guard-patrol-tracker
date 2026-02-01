@@ -97,10 +97,10 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 max-w-7xl mx-auto w-full safe-area-x safe-area-bottom">
+      <main className="flex-1 px-5 py-5 sm:px-8 sm:py-6 max-w-7xl mx-auto w-full safe-area-x safe-area-bottom">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5 sm:space-y-6">
           {/* Clean Tabs Navigation */}
-          <TabsList className="w-full h-auto p-1 bg-card/80 backdrop-blur-sm rounded-lg border border-border/60 grid grid-cols-5 gap-1">
+          <TabsList className="w-full h-auto p-1.5 bg-card/80 backdrop-blur-sm rounded-xl border border-border/60 grid grid-cols-5 gap-1">
             <TabsTrigger 
               value="overview" 
               className="flex items-center justify-center gap-1.5 rounded-md py-2.5 px-2 text-xs sm:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
