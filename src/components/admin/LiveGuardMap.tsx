@@ -104,21 +104,27 @@ export function LiveGuardMap() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Live Guard Tracking</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Live Guard Tracking</h2>
+          <p className="text-sm text-muted-foreground/80">
             Real-time location of guards on patrol
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-sm text-muted-foreground flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Updated {formatDistanceToNow(lastUpdate, { addSuffix: true })}
+          <div className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Updated {formatDistanceToNow(lastUpdate, { addSuffix: true })}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchData} 
+            disabled={isLoading}
+            className="rounded-xl border-border/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+          >
             <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
@@ -126,79 +132,109 @@ export function LiveGuardMap() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-success">
-            <Wifi className="w-5 h-5" />
-            <span className="text-2xl font-bold">{activeGuards.length}</span>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-success/20 bg-gradient-to-br from-success/15 to-success/5 p-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-success/20 flex items-center justify-center">
+              <Wifi className="w-4 h-4 text-success" />
+            </div>
+            <div>
+              <span className="text-2xl font-bold text-foreground">{activeGuards.length}</span>
+              <p className="text-xs text-muted-foreground/80">Active Guards</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Active Guards</p>
         </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <WifiOff className="w-5 h-5" />
-            <span className="text-2xl font-bold">
-              {guardLocations.length - activeGuards.length}
-            </span>
+        <div className="rounded-xl border border-border/50 bg-gradient-to-br from-muted/30 to-muted/10 p-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center">
+              <WifiOff className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div>
+              <span className="text-2xl font-bold text-foreground">
+                {guardLocations.length - activeGuards.length}
+              </span>
+              <p className="text-xs text-muted-foreground/80">Offline</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Offline</p>
         </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-primary">
-            <MapPin className="w-5 h-5" />
-            <span className="text-2xl font-bold">{checkpoints.length}</span>
+        <div className="rounded-xl border border-accent/20 bg-gradient-to-br from-accent/15 to-accent/5 p-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center">
+              <MapPin className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <span className="text-2xl font-bold text-foreground">{checkpoints.length}</span>
+              <p className="text-xs text-muted-foreground/80">Checkpoints</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Checkpoints</p>
         </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-primary">
-            <User className="w-5 h-5" />
-            <span className="text-2xl font-bold">{guardLocations.length}</span>
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/15 to-primary/5 p-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center">
+              <User className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <span className="text-2xl font-bold text-foreground">{guardLocations.length}</span>
+              <p className="text-xs text-muted-foreground/80">Total Tracked</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Total Tracked</p>
         </div>
       </div>
 
       {/* Map + Guard List */}
-      <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid lg:grid-cols-3 gap-4">
         {/* Real Map Area */}
-        <div className="lg:col-span-2 glass-card p-2 sm:p-4 min-h-[350px] sm:min-h-[450px]">
+        <div className="lg:col-span-2 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-2 sm:p-3 min-h-[350px] sm:min-h-[450px]">
           <GuardMapView guardLocations={guardLocations} checkpoints={checkpoints} />
         </div>
 
         {/* Guard List */}
-        <div className="glass-card p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <User className="w-5 h-5" />
+        <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 sm:p-5">
+          <h3 className="font-semibold mb-4 flex items-center gap-2 text-foreground">
+            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <User className="w-4 h-4 text-primary" />
+            </div>
             Guard Status
           </h3>
           
-          <div className="space-y-3 max-h-[350px] overflow-y-auto">
+          <div className="space-y-2.5 max-h-[350px] overflow-y-auto pr-1">
             {guardLocations.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                No guard locations recorded yet
-              </p>
+              <div className="text-center py-10">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted/50 flex items-center justify-center">
+                  <User className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-sm">No guard locations recorded yet</p>
+              </div>
             ) : (
               guardLocations.map((guard) => (
                 <motion.div
                   key={guard.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/30 transition-all duration-200"
                 >
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center ring-2 ring-primary/20">
                       <User className="w-5 h-5 text-primary" />
                     </div>
-                    <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${getStatusColor(guard.status, guard.updated_at)}`} />
+                    <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-card ${getStatusColor(guard.status, guard.updated_at)}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{guard.guard_name}</p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
+                    <p className="font-medium truncate text-foreground">{guard.guard_name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs px-2 py-0.5 ${
+                          getStatusLabel(guard.status, guard.updated_at) === 'On Patrol' 
+                            ? 'border-success/30 text-success bg-success/10' 
+                            : getStatusLabel(guard.status, guard.updated_at) === 'Idle'
+                            ? 'border-warning/30 text-warning bg-warning/10'
+                            : 'border-muted-foreground/30 text-muted-foreground bg-muted/20'
+                        }`}
+                      >
                         {getStatusLabel(guard.status, guard.updated_at)}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground/70">
                         {formatDistanceToNow(new Date(guard.updated_at), { addSuffix: true })}
                       </span>
                     </div>

@@ -69,72 +69,93 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col safe-area-top">
+    <div className="min-h-screen flex flex-col safe-area-top bg-gradient-to-b from-background via-background to-background/95">
       {/* Header */}
-      <header className="glass-card rounded-none border-x-0 border-t-0 p-3 sm:p-4 sticky top-0 z-50 safe-area-x">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center flex-shrink-0">
-              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50 safe-area-x">
+        <div className="flex items-center justify-between max-w-7xl mx-auto px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-primary via-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25">
+              <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-foreground text-sm sm:text-base truncate">Guard Patrol</p>
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile?.full_name}</p>
+              <h1 className="font-bold text-foreground text-base sm:text-lg tracking-tight">Guard Patrol</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile?.full_name || 'Admin'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2">
             <InstallButton />
-            <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground touch-feedback h-9 w-9 sm:h-10 sm:w-10">
-              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={signOut} 
+              className="text-muted-foreground hover:text-foreground hover:bg-destructive/10 h-10 w-10 rounded-xl transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-3 sm:p-4 md:p-6 max-w-7xl mx-auto w-full safe-area-x safe-area-bottom">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <TabsList className="glass-card p-1 w-full grid grid-cols-5 gap-0.5 sm:gap-1 h-auto">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm py-2.5 sm:py-2 px-1 sm:px-3 touch-feedback">
-              <ClipboardList className="w-4 h-4 sm:mr-2 hidden sm:block" />
-              <span className="sm:inline">Overview</span>
+      <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 max-w-7xl mx-auto w-full safe-area-x safe-area-bottom">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5 sm:space-y-6">
+          {/* Enhanced Tabs */}
+          <TabsList className="w-full p-1.5 bg-secondary/50 backdrop-blur-sm rounded-xl border border-border/50 grid grid-cols-5 gap-1">
+            <TabsTrigger 
+              value="overview" 
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+            >
+              <ClipboardList className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="tracking" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm py-2.5 sm:py-2 px-1 sm:px-3 touch-feedback">
-              <Radio className="w-4 h-4 sm:mr-2 hidden sm:block" />
-              <span className="sm:inline">Live</span>
+            <TabsTrigger 
+              value="tracking" 
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+            >
+              <Radio className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Live</span>
             </TabsTrigger>
-            <TabsTrigger value="guards" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm py-2.5 sm:py-2 px-1 sm:px-3 touch-feedback">
-              <Users className="w-4 h-4 sm:mr-2 hidden sm:block" />
-              <span className="sm:inline">Guards</span>
+            <TabsTrigger 
+              value="guards" 
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+            >
+              <Users className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Guards</span>
             </TabsTrigger>
-            <TabsTrigger value="checkpoints" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm py-2.5 sm:py-2 px-1 sm:px-3 touch-feedback">
-              <MapPin className="w-4 h-4 sm:mr-2 hidden sm:block" />
-              <span className="sm:inline">Points</span>
+            <TabsTrigger 
+              value="checkpoints" 
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+            >
+              <MapPin className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Points</span>
             </TabsTrigger>
-            <TabsTrigger value="logs" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm py-2.5 sm:py-2 px-1 sm:px-3 touch-feedback">
-              <ClipboardList className="w-4 h-4 sm:mr-2 hidden sm:block" />
-              <span className="sm:inline">Logs</span>
+            <TabsTrigger 
+              value="logs" 
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+            >
+              <ClipboardList className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logs</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-6 mt-0">
             <DashboardStats stats={stats} />
             <ScanLogs limit={5} showFilters={false} />
           </TabsContent>
 
-          <TabsContent value="tracking">
+          <TabsContent value="tracking" className="mt-0">
             <LiveGuardMap />
           </TabsContent>
 
-          <TabsContent value="guards">
+          <TabsContent value="guards" className="mt-0">
             <GuardManagement onUpdate={fetchStats} />
           </TabsContent>
 
-          <TabsContent value="checkpoints">
+          <TabsContent value="checkpoints" className="mt-0">
             <CheckpointManagement onUpdate={fetchStats} />
           </TabsContent>
 
-          <TabsContent value="logs">
+          <TabsContent value="logs" className="mt-0">
             <ScanLogs showFilters={true} />
           </TabsContent>
         </Tabs>
