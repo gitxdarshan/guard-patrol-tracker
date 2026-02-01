@@ -99,41 +99,41 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 max-w-7xl mx-auto w-full safe-area-x safe-area-bottom">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5 sm:space-y-6">
-          {/* Enhanced Tabs */}
-          <TabsList className="w-full p-1.5 bg-secondary/50 backdrop-blur-sm rounded-xl border border-border/50 grid grid-cols-5 gap-1">
+          {/* Clean Tabs Navigation */}
+          <TabsList className="w-full h-auto p-1 bg-card/80 backdrop-blur-sm rounded-lg border border-border/60 grid grid-cols-5 gap-1">
             <TabsTrigger 
               value="overview" 
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+              className="flex items-center justify-center gap-1.5 rounded-md py-2.5 px-2 text-xs sm:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
             >
-              <ClipboardList className="w-4 h-4 sm:mr-2" />
+              <ClipboardList className="w-4 h-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
             <TabsTrigger 
               value="tracking" 
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+              className="flex items-center justify-center gap-1.5 rounded-md py-2.5 px-2 text-xs sm:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
             >
-              <Radio className="w-4 h-4 sm:mr-2" />
+              <Radio className="w-4 h-4" />
               <span className="hidden sm:inline">Live</span>
             </TabsTrigger>
             <TabsTrigger 
               value="guards" 
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+              className="flex items-center justify-center gap-1.5 rounded-md py-2.5 px-2 text-xs sm:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
             >
-              <Users className="w-4 h-4 sm:mr-2" />
+              <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Guards</span>
             </TabsTrigger>
             <TabsTrigger 
               value="checkpoints" 
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+              className="flex items-center justify-center gap-1.5 rounded-md py-2.5 px-2 text-xs sm:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
             >
-              <MapPin className="w-4 h-4 sm:mr-2" />
+              <MapPin className="w-4 h-4" />
               <span className="hidden sm:inline">Points</span>
             </TabsTrigger>
             <TabsTrigger 
               value="logs" 
-              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md text-xs sm:text-sm font-medium py-2.5 sm:py-2.5 px-2 sm:px-4 transition-all duration-200"
+              className="flex items-center justify-center gap-1.5 rounded-md py-2.5 px-2 text-xs sm:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all"
             >
-              <ClipboardList className="w-4 h-4 sm:mr-2" />
+              <ClipboardList className="w-4 h-4" />
               <span className="hidden sm:inline">Logs</span>
             </TabsTrigger>
           </TabsList>
