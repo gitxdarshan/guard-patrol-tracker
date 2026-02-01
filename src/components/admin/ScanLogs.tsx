@@ -124,19 +124,20 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
   );
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Scan Logs</h2>
-          <p className="text-sm text-muted-foreground/80">View all checkpoint scan records</p>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">Scan Logs</h2>
+          <p className="text-sm text-muted-foreground">View all checkpoint scan records</p>
         </div>
         {showFilters && (
           <Button 
             onClick={exportCSV} 
             variant="outline" 
             disabled={scans.length === 0} 
-            className="w-full sm:w-auto rounded-xl border-border/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all"
+            size="sm"
+            className="w-full sm:w-auto border-border/60"
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV
@@ -146,7 +147,7 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
 
       {/* Filters */}
       {showFilters && (
-        <div className="rounded-xl border border-border/50 bg-secondary/30 backdrop-blur-sm p-4">
+        <div className="bg-card border border-border/60 rounded-lg p-3 sm:p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -154,7 +155,7 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
                 placeholder="Search..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="pl-10 h-11 rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
+                className="pl-9 h-10 bg-background border-border/60"
               />
             </div>
             <div className="relative">
@@ -163,18 +164,18 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
                 type="date"
                 value={filters.date}
                 onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                className="pl-10 h-11 rounded-xl bg-background/50 border-border/50 focus:border-primary/50"
+                className="pl-9 h-10 bg-background border-border/60"
               />
             </div>
             <Select
               value={filters.guardId}
               onValueChange={(value) => setFilters({ ...filters, guardId: value })}
             >
-              <SelectTrigger className="h-11 rounded-xl bg-background/50 border-border/50">
+              <SelectTrigger className="h-10 bg-background border-border/60">
                 <User className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
                 <SelectValue placeholder="All Guards" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-border/50 bg-popover">
+              <SelectContent className="bg-popover border-border">
                 <SelectItem value="all">All Guards</SelectItem>
                 {guards.map((guard) => (
                   <SelectItem key={guard.user_id} value={guard.user_id}>
@@ -187,11 +188,11 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
               value={filters.checkpointId}
               onValueChange={(value) => setFilters({ ...filters, checkpointId: value })}
             >
-              <SelectTrigger className="h-11 rounded-xl bg-background/50 border-border/50">
+              <SelectTrigger className="h-10 bg-background border-border/60">
                 <MapPin className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
                 <SelectValue placeholder="All Checkpoints" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-border/50 bg-popover">
+              <SelectContent className="bg-popover border-border">
                 <SelectItem value="all">All Checkpoints</SelectItem>
                 {checkpoints.map((cp) => (
                   <SelectItem key={cp.id} value={cp.id}>
@@ -205,69 +206,56 @@ export function ScanLogs({ limit, showFilters = true }: ScanLogsProps) {
       )}
 
       {/* Logs Table */}
-      <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+      <div className="bg-card border border-border/60 rounded-lg overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">Loading logs...</p>
-            </div>
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : filteredScans.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
-              <ClipboardList className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground font-medium">No scan records found</p>
-            <p className="text-sm text-muted-foreground/60 mt-1">Scans will appear here once guards start patrolling</p>
+          <div className="text-center py-12">
+            <ClipboardList className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-muted-foreground">No scan records found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-secondary/50 border-b border-border/50">
-                <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground/80">
-                  <th className="px-4 py-3.5 font-semibold">Guard</th>
-                  <th className="px-4 py-3.5 font-semibold">Checkpoint</th>
-                  <th className="px-4 py-3.5 font-semibold">Date & Time</th>
-                  <th className="px-4 py-3.5 font-semibold">Status</th>
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 border-b border-border/60">
+                <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <th className="px-4 py-3 font-medium">Guard</th>
+                  <th className="px-4 py-3 font-medium">Checkpoint</th>
+                  <th className="px-4 py-3 font-medium">Date & Time</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/30">
+              <tbody className="divide-y divide-border/40">
                 {filteredScans.map((scan, index) => (
                   <motion.tr
                     key={scan.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: index * 0.02 }}
-                    className="hover:bg-secondary/30 transition-colors group"
+                    className="hover:bg-muted/30 transition-colors"
                   >
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
                           <User className="w-4 h-4 text-primary" />
                         </div>
                         <span className="font-medium text-foreground">{scan.guard_name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin className="w-4 h-4 text-accent" />
                         <span>{scan.checkpoint_name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5">
-                      <div className="text-sm">
-                        <p className="text-foreground font-medium">
-                          {format(new Date(scan.scanned_at), 'MMM d, yyyy')}
-                        </p>
-                        <p className="text-muted-foreground/70 text-xs">
-                          {format(new Date(scan.scanned_at), 'h:mm a')}
-                        </p>
-                      </div>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {format(new Date(scan.scanned_at), 'MMM d, yyyy h:mm a')}
                     </td>
-                    <td className="px-4 py-3.5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/25">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-success/15 text-success border border-success/20">
+                        <CheckCircle2 className="w-3 h-3" />
                         Verified
                       </span>
                     </td>
