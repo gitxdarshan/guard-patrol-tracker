@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, User, Clock, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { User, Clock, Wifi, WifiOff, RefreshCw, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GuardLocation, Checkpoint } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
+import { GuardMapView } from './GuardMapView';
 
 export function LiveGuardMap() {
   const [guardLocations, setGuardLocations] = useState<GuardLocation[]>([]);
@@ -158,113 +159,11 @@ export function LiveGuardMap() {
         </div>
       </div>
 
-      {/* Map Placeholder + Guard List */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Map Area */}
-        <div className="lg:col-span-2 glass-card p-6 min-h-[400px] relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-secondary/5" />
-          
-          {/* Simple visual map representation */}
-          <div className="relative h-full flex flex-col">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="w-5 h-5 text-primary" />
-              <span className="font-semibold">Location Overview</span>
-            </div>
-            
-            <div className="flex-1 relative rounded-lg bg-secondary/30 border border-border overflow-hidden">
-              {/* Grid background */}
-              <div className="absolute inset-0 opacity-20" 
-                style={{
-                  backgroundImage: 'linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)',
-                  backgroundSize: '40px 40px'
-                }}
-              />
-              
-              {/* Guard markers positioned relatively */}
-              <AnimatePresence>
-                {activeGuards.map((guard, index) => {
-                  // Simple positioning based on index for demo
-                  const positions = [
-                    { top: '20%', left: '30%' },
-                    { top: '40%', left: '60%' },
-                    { top: '60%', left: '25%' },
-                    { top: '30%', left: '75%' },
-                    { top: '70%', left: '50%' },
-                  ];
-                  const pos = positions[index % positions.length];
-                  
-                  return (
-                    <motion.div
-                      key={guard.guard_id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      className="absolute transform -translate-x-1/2 -translate-y-1/2"
-                      style={{ top: pos.top, left: pos.left }}
-                    >
-                      <div className="relative group cursor-pointer">
-                        {/* Pulse animation */}
-                        <div className="absolute inset-0 rounded-full bg-success/30 animate-ping" />
-                        
-                        {/* Guard marker */}
-                        <div className="relative w-10 h-10 rounded-full bg-success flex items-center justify-center shadow-lg">
-                          <User className="w-5 h-5 text-white" />
-                        </div>
-                        
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                          <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
-                            <p className="font-medium text-sm">{guard.guard_name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(guard.updated_at), { addSuffix: true })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-
-              {/* Checkpoint markers */}
-              {checkpoints.filter(cp => cp.latitude && cp.longitude).slice(0, 5).map((cp, index) => {
-                const positions = [
-                  { top: '15%', left: '20%' },
-                  { top: '50%', left: '40%' },
-                  { top: '80%', left: '70%' },
-                  { top: '25%', left: '85%' },
-                  { top: '65%', left: '15%' },
-                ];
-                const pos = positions[index % positions.length];
-
-                return (
-                  <div
-                    key={cp.id}
-                    className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
-                    style={{ top: pos.top, left: pos.left }}
-                  >
-                    <div className="w-6 h-6 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
-                      <MapPin className="w-3 h-3 text-primary" />
-                    </div>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                      <div className="bg-background border border-border rounded px-2 py-1 text-xs whitespace-nowrap">
-                        {cp.name}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {activeGuards.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <User className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>No active guards on patrol</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Map + Guard List */}
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Real Map Area */}
+        <div className="lg:col-span-2 glass-card p-2 sm:p-4 min-h-[350px] sm:min-h-[450px]">
+          <GuardMapView guardLocations={guardLocations} checkpoints={checkpoints} />
         </div>
 
         {/* Guard List */}
